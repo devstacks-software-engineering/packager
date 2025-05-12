@@ -1,0 +1,175 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import zlib from 'node:zlib';
+import { promisify } from 'node:util';
+import { CompressionAlgorithm, CompressionOptions } from './types.js';
+
+/**
+ * Maps file extensions to compression algorithms
+ */
+const extensionToAlgorithm: Record<string, CompressionAlgorithm> = {
+  '.gz': CompressionAlgorithm.GZIP,
+  '.gzip': CompressionAlgorithm.GZIP,
+  '.br': CompressionAlgorithm.BROTLI,
+  '.brotli': CompressionAlgorithm.BROTLI,
+  '.deflate': CompressionAlgorithm.DEFLATE,
+};
+
+/**
+ * Detects compression algorithm based on file extension
+ * @param filePath Path to the file
+ * @returns Detected compression algorithm or null if not detected
+ */
+export function detectAlgorithmFromExtension(filePath: string): CompressionAlgorithm | null {
+  const ext = path.extname(filePath).toLowerCase();
+  return extensionToAlgorithm[ext] || null;
+}
+
+const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
+const mkdir = promisify(fs.mkdir);
+
+// Promisify zlib functions
+const gzip = promisify(zlib.gzip);
+const gunzip = promisify(zlib.gunzip);
+const brotliCompress = promisify(zlib.brotliCompress);
+const brotliDecompress = promisify(zlib.brotliDecompress);
+const deflate = promisify(zlib.deflate);
+const inflate = promisify(zlib.inflate);
+
+/**
+ * Compresses data using the specified algorithm
+ * @param data Data to compress
+ * @param options Compression options
+ * @returns Compressed data
+ */
+export async function compressData(
+  data: Buffer,
+  options: CompressionOptions
+): Promise<Buffer> {
+  // Default compression level
+  const level = options.level ?? 6;
+
+  // Compress based on algorithm
+  switch (options.algorithm) {
+  case CompressionAlgorithm.GZIP:
+    return await gzip(data, { level });
+  case CompressionAlgorithm.BROTLI:
+    return await brotliCompress(data, {
+      params: {
+        [zlib.constants.BROTLI_PARAM_QUALITY]: level,
+      },
+    });
+  case CompressionAlgorithm.DEFLATE:
+    return await deflate(data, { level });
+  default:
+    throw new Error(`Unsupported compression algorithm: ${options.algorithm}`);
+  }
+}
+
+/**
+ * Decompresses data using the appropriate algorithm based on file format detection
+ * @param data Compressed data
+ * @param algorithm Optional algorithm to use (if known)
+ * @returns Decompressed data
+ */
+export async function decompressData(
+  data: Buffer,
+  algorithm?: CompressionAlgorithm
+): Promise<Buffer> {
+  // If algorithm is specified, use it
+  if (algorithm) {
+    switch (algorithm) {
+    case CompressionAlgorithm.GZIP:
+      return gunzip(data);
+    case CompressionAlgorithm.BROTLI:
+      return brotliDecompress(data);
+    case CompressionAlgorithm.DEFLATE:
+      return inflate(data);
+    default:
+      throw new Error(`Unsupported compression algorithm: ${algorithm}`);
+    }
+  }
+
+  // Try to detect the format based on headers
+  try {
+    // Try GZIP first (most common)
+    if (data[0] === 0x1F && data[1] === 0x8B) {
+      return await gunzip(data);
+    }
+
+    // Try Brotli - no consistent header, but try it next
+    try {
+      return await brotliDecompress(data);
+    } catch {
+      // Brotli decompression failed
+    }
+
+    // Don't try DEFLATE as fallback since it's error-prone when used blindly
+    // DEFLATE doesn't have a consistent signature and can lead to false positives
+    throw new Error('Unable to detect compression algorithm. Please specify the algorithm explicitly.');
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Decompression failed: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Compresses a file
+ * @param inputPath Path to the file to compress
+ * @param outputPath Path to write the compressed file
+ * @param options Compression options
+ */
+export async function compressFile(
+  inputPath: string,
+  outputPath: string,
+  options: CompressionOptions
+): Promise<void> {
+  // Read input file
+  const data = await readFile(inputPath);
+
+  // Compress data
+  const compressed = await compressData(data, options);
+
+  // Ensure output directory exists
+  const outputDir = path.dirname(outputPath);
+  await mkdir(outputDir, { recursive: true });
+
+  // Write compressed data
+  await writeFile(outputPath, compressed);
+}
+
+/**
+ * Decompresses a file
+ * @param inputPath Path to the compressed file
+ * @param outputPath Path to write the decompressed file
+ * @param algorithm Optional compression algorithm to use for decompression
+ */
+export async function decompressFile(
+  inputPath: string,
+  outputPath: string,
+  algorithm?: CompressionAlgorithm
+): Promise<void> {
+  // Read compressed file
+  const compressed = await readFile(inputPath);
+
+  // If algorithm is not specified, try to detect from file extension
+  if (!algorithm) {
+    const detectedAlgorithm = detectAlgorithmFromExtension(inputPath);
+    if (detectedAlgorithm) {
+      algorithm = detectedAlgorithm;
+    }
+  }
+
+  // Decompress data with detected or provided algorithm
+  const decompressed = await decompressData(compressed, algorithm);
+
+  // Ensure output directory exists
+  const outputDir = path.dirname(outputPath);
+  await mkdir(outputDir, { recursive: true });
+
+  // Write decompressed data
+  await writeFile(outputPath, decompressed);
+}
