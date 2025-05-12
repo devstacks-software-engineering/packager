@@ -43,6 +43,69 @@ describe('Archive Commands', () => {
         }
       );
     });
+
+    it('should handle archive creation failures', async () => {
+      // Arrange
+      const sourcePath = '/source/path';
+      const outputPath = '/output/path';
+      const options = {};
+      const testError = new Error('Archive creation failed');
+
+      // Mock archiveDirectory to throw an error
+      vi.mocked(core.archiveDirectory).mockRejectedValueOnce(testError);
+
+      // Act
+      await handleArchive(sourcePath, outputPath, options);
+
+      // Assert
+      expect(utils.error).toHaveBeenCalledWith('Failed to create archive: Archive creation failed');
+    });
+
+    it('should handle unknown archive errors', async () => {
+      // Arrange
+      const sourcePath = '/source/path';
+      const outputPath = '/output/path';
+      const options = {};
+
+      // Mock archiveDirectory to throw a non-Error object
+      vi.mocked(core.archiveDirectory).mockRejectedValueOnce('Not an error object');
+
+      // Act
+      await handleArchive(sourcePath, outputPath, options);
+
+      // Assert
+      expect(utils.error).toHaveBeenCalledWith('Failed to create archive: Unknown error');
+    });
+
+    it('should handle path validation failures for archive', async () => {
+      // Arrange
+      const sourcePath = '/source/path';
+      const outputPath = '/output/path';
+      const options = {};
+
+      // Mock validatePath to fail
+      vi.mocked(utils.validatePath).mockReturnValueOnce(false);
+
+      // Act
+      await handleArchive(sourcePath, outputPath, options);
+
+      // Assert
+      expect(core.archiveDirectory).not.toHaveBeenCalled();
+    });
+
+    it('should handle validation failures for archive', async () => {
+      // Arrange
+      const sourcePath = ''; // Empty path should fail validation
+      const outputPath = '/output/path';
+      const options = {};
+
+      // Act
+      await handleArchive(sourcePath, outputPath, options);
+
+      // Assert
+      expect(utils.error).toHaveBeenCalledWith(expect.stringContaining('Validation error'));
+      expect(core.archiveDirectory).not.toHaveBeenCalled();
+    });
   });
 
   describe('handleUnarchive', () => {
