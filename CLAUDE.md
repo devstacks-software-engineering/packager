@@ -1,0 +1,32 @@
+# Claude Guidelines
+
+- You MUST use the MCP context7 to learn about some package before writing code
+- You MUST use the MCP id-generator if you need to generate an unique identifier
+- You MUST run `npm run lint:fix`, `npm run build`, `npm run lint`, `npm run typecheck`, and `npm run test` before considering your code done.
+- For Linting, you MUST NOT disable any rule from the ESLint configuration during the code development.
+- For Linting, you MUST NOT disable any rule from the TypeScript configuration during the code development.
+- For Development, you MUST NOT delete or comment code just to pass the tests or build.
+- For Development, you MUST NOT use or keep a deprecated feature or function from any library.
+- In Tests, you MUST ensure coverage of at least 90%.
+- In Tests, you MUST implement the tests in vitest directory.
+- In Tests, you MUST NOT create an assertion true equal true or simply skip to pass the tests.
+- In Comments, you MUST NOT comment a self-explanotory and trivial code, except when it is an organizational comment such as Act, Assert, Arrange, etc.
+- In Comments, you MUST NOT leave any code commented. It is commented it is because it needs to be deleted.
+- In TypeScript, you MUST use `import` instead of `require` and the imported path must end with `.js` because the module system is ESM.
+- In TypeScript, you MUST explicitly define the type of every variable, function parameter, and return value.
+- In TypeScript, you MUST avoid use of `any` type. Use `unknown` instead. You SHOULD use `never` type when you are sure that a function will never return.
+- In TypeScript, you SHOULD try to type everything, including the return type of a function
+- In TypeScript, you MUST use `const` instead of `let` when you are sure that a variable will not be re-assigned
+- In TypeScript, you MUST use `null` instead of `undefined` when you want to represent the absence of a value.
+- In TypeScript, you MUST use `void` type when a function does not return a value.
+- In TypeScript, you MUST use `async` and `await` keywords when you are working with promises.
+- In TypeScript, you MUST use `try...catch` block to handle errors.
+- In TypeScript, you MUST use `finally` block to perform cleanup operations when it is necessary.
+- In TypeScript, you MUST use `zod` for validation.
+- In TypeScript, you MUST use `commander` for CLI arguments parsing.
+- In TypeScript, you MUST use `ora` for CLI progress indicators.
+- In TypeScript, you MUST use `chalk` for CLI colors.
+- In TypeScript, you MUST use `glob` for file globbing.
+- In TypeScript, you MUST use `inquirer` for CLI prompts.
+- In TypeScript, you MUST use `mime-types` for MIME type detection.
+- In TypeScript, you MUST use `tweetnacl` for signing.
