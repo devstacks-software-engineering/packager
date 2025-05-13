@@ -243,7 +243,9 @@ export async function handleCompress(sourcePath: string, outputPath: string, opt
       }
 
       // Calculate compression ratio
-      const ratio = ((sourceInfo.size - outputInfo.size) / sourceInfo.size * 100).toFixed(2);
+      const ratio = sourceInfo.size === 0
+        ? '0.00'
+        : (((sourceInfo.size - outputInfo.size) / sourceInfo.size) * 100).toFixed(2);
 
       // Show success message
       const successMsg = shouldArchive
@@ -599,7 +601,9 @@ export async function handlePackage(sourcePath: string, outputPath: string, opti
 
     // Calculate compression ratio if both files exist
     if (archiveInfo && packageInfo) {
-      const ratio = ((archiveInfo.size - packageInfo.size) / archiveInfo.size * 100).toFixed(2);
+      const ratio = archiveInfo.size === 0
+        ? '0.00'
+        : (((archiveInfo.size - packageInfo.size) / archiveInfo.size) * 100).toFixed(2);
       info(`Compression ratio: ${ratio}%`);
     }
 
