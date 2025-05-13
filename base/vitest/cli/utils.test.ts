@@ -33,16 +33,14 @@ describe('CLI Utils Tests', () => {
     console.log = vi.fn();
     console.error = vi.fn();
 
-    // Reset all mock functions
-    vi.resetAllMocks();
+    // Clear mock function call history without resetting them
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
     // Restore console methods
     console.log = originalConsoleLog;
     console.error = originalConsoleError;
-
-    vi.clearAllMocks();
   });
 
   // Module import tests
