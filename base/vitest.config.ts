@@ -11,6 +11,17 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'html'],
       provider: 'istanbul',
+      exclude: [
+        'tools/**',
+        '**/node_modules/**',
+        'dist/**',
+        '**/vitest/**',
+        '**/*.js',
+        '**/*.d.ts'
+      ],
+      include: [
+        'src/**/*.ts'
+      ]
     },
   },
   resolve: {
