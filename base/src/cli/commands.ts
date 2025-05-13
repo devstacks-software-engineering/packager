@@ -40,7 +40,8 @@ const OptionsSchema = z.object({
   privkey: z.string().optional(),
   pubkey: z.string().optional(),
   clean: z.boolean().optional(),
-  level: z.string().regex(/^[1-9]$/, 'Compression level must be between 1-9').optional()
+  level: z.string().regex(/^[1-9]$/, 'Compression level must be between 1-9').optional(),
+  archive: z.boolean().optional()
 }).strict().catchall(z.unknown());
 
 const ArchiveOptionsSchema = OptionsSchema.pick({
@@ -50,7 +51,8 @@ const ArchiveOptionsSchema = OptionsSchema.pick({
 
 const CompressOptionsSchema = OptionsSchema.pick({
   algorithm: true,
-  level: true
+  level: true,
+  archive: true
 });
 
 const SignOptionsSchema = OptionsSchema.pick({
