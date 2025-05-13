@@ -1,6 +1,6 @@
 {
   "name": "@devstacks/packager",
-  "version": "0.16.0",
+  "version": "0.18.0",
   "description": "A versatile utility for archiving, compressing, and signing deployment files.",
   "keywords": [
     "package",
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node tools/update-version.js",
     "test": "vitest run",
     "start": "node ./bin/packager.js",
     "dev": "node --loader ts-node/esm src/cli/index.ts",
