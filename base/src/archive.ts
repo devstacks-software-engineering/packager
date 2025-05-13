@@ -68,8 +68,11 @@ export async function createArchive(
     // Get file stats
     const fileStats = await stat(file);
 
-    // Get relative path
-    const relativePath = path.relative(sourcePath, file);
+    // Get relative path with normalized separators (always use forward slash)
+    const relativePath = path
+      .relative(sourcePath, file)
+      .split(path.sep)
+      .join('/');
 
     // Get MIME type
     const mimeType = mime.lookup(file) || 'application/octet-stream';
