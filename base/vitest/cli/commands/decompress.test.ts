@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { setupMocks, mockSpinner, path } from './common.test.js';
+import { setupMocks, mockSpinner } from './common.test.js';
+import * as path from 'node:path';
 
 // Setup mocks before importing modules
 setupMocks();
