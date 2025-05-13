@@ -11,6 +11,8 @@ export interface Options {
   pubkey?: string;
   clean?: boolean;
   level?: string;
+  archive?: boolean; // Archive the directory before compression
+  unarchive?: boolean; // Unarchive after decompression
   [key: string]: unknown;
 }
 
@@ -41,7 +43,8 @@ const OptionsSchema = z.object({
   pubkey: z.string().optional(),
   clean: z.boolean().optional(),
   level: z.string().regex(/^[1-9]$/, 'Compression level must be between 1-9').optional(),
-  archive: z.boolean().optional()
+  archive: z.boolean().optional(),
+  unarchive: z.boolean().optional()
 }).strict().catchall(z.unknown());
 
 const ArchiveOptionsSchema = OptionsSchema.pick({
@@ -53,6 +56,11 @@ const CompressOptionsSchema = OptionsSchema.pick({
   algorithm: true,
   level: true,
   archive: true
+});
+
+const DecompressOptionsSchema = OptionsSchema.pick({
+  algorithm: true,
+  unarchive: true
 });
 
 const SignOptionsSchema = OptionsSchema.pick({
@@ -283,8 +291,8 @@ export async function handleCompress(sourcePath: string, outputPath: string, opt
 export async function handleDecompress(sourcePath: string, outputPath: string, options: Options): Promise<void> {
   // Validate input parameters
   if (!validateParams(
-    [PathSchema, PathSchema],
-    [sourcePath, outputPath]
+    [PathSchema, PathSchema, DecompressOptionsSchema],
+    [sourcePath, outputPath, options]
   )) {
     return;
   }
