@@ -14,6 +14,12 @@ describe('Decompress Commands', () => {
   // Reset mocks before each test to ensure clean state
   beforeEach(() => {
     vi.resetAllMocks();
+    // Re-establish required default mocks
+    vi.mocked(utils.validatePath).mockReturnValue(true);
+    vi.mocked(utils.getFileInfo).mockReturnValue({
+      size: 1024,
+      formattedSize: '1 KB',
+    } as any);
     // Default mock implementations for fs functions used in handlers
     vi.mocked(fs.existsSync).mockReturnValue(true);
     vi.mocked(fs.statSync).mockReturnValue({ isDirectory: () => false } as any);
