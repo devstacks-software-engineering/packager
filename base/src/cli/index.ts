@@ -20,8 +20,7 @@ import {
   handleUnarchive
 } from './commands.js';
 
-// Get package version
-const version = '0.16.0'; // Hardcoded version since dynamic imports of package.json can be problematic
+import { version } from './version.js';
 
 // Configure main CLI program
 program
