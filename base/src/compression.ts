@@ -50,6 +50,11 @@ export async function compressData(
   // Default compression level
   const level = options.level ?? 6;
 
+  // Validate compression level based on algorithm
+  if (level < 0 || level > (options.algorithm === CompressionAlgorithm.BROTLI ? 11 : 9)) {
+    throw new RangeError(`Invalid compression level ${level}. Expected 0-9 (gzip/deflate) or 0-11 (brotli).`);
+  }
+
   // Compress based on algorithm
   switch (options.algorithm) {
   case CompressionAlgorithm.GZIP:
