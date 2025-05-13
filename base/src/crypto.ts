@@ -61,6 +61,11 @@ export async function signData(
     throw new Error('Private key or path to private key file is required');
   }
 
+  // Validate private key length
+  if (privateKey.length !== 64) {
+    throw new Error(`Invalid private key length ${privateKey.length}, expected 64 bytes`);
+  }
+
   // Sign data
   const signature = nacl.sign.detached(data, privateKey);
 
@@ -88,6 +93,16 @@ export async function verifyData(
     publicKey = await readFile(options.publicKeyPath);
   } else {
     throw new Error('Public key or path to public key file is required');
+  }
+
+  // Validate public key length
+  if (publicKey.length !== 32) {
+    throw new Error(`Invalid public key length ${publicKey.length}, expected 32 bytes`);
+  }
+
+  // Validate signature length
+  if (signature.length !== 64) {
+    throw new Error(`Invalid signature length ${signature.length}, expected 64 bytes`);
   }
 
   // Verify signature

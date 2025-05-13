@@ -148,12 +148,41 @@ describe('Crypto Module', () => {
       );
     });
 
+    it('should throw error for invalid private key length', async () => {
+      const testData = Buffer.from('Some test data');
+      const invalidPrivateKey = Buffer.alloc(32); // Wrong length, should be 64
+
+      await expect(signData(testData, { privateKey: invalidPrivateKey })).rejects.toThrow(
+        'Invalid private key length 32, expected 64 bytes'
+      );
+    });
+
     it('should throw error if public key is not provided', async () => {
       const testData = Buffer.from('Some test data');
       const signature = Buffer.alloc(64);
 
       await expect(verifyData(testData, signature, {})).rejects.toThrow(
         'Public key or path to public key file is required'
+      );
+    });
+
+    it('should throw error for invalid public key length', async () => {
+      const testData = Buffer.from('Some test data');
+      const signature = Buffer.alloc(64);
+      const invalidPublicKey = Buffer.alloc(16); // Wrong length, should be 32
+
+      await expect(verifyData(testData, signature, { publicKey: invalidPublicKey })).rejects.toThrow(
+        'Invalid public key length 16, expected 32 bytes'
+      );
+    });
+
+    it('should throw error for invalid signature length', async () => {
+      const testData = Buffer.from('Some test data');
+      const invalidSignature = Buffer.alloc(32); // Wrong length, should be 64
+      const { publicKey } = generateKeyPair();
+
+      await expect(verifyData(testData, invalidSignature, { publicKey })).rejects.toThrow(
+        'Invalid signature length 32, expected 64 bytes'
       );
     });
 
