@@ -3,17 +3,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { promisify } from 'node:util';
 import { CompressionAlgorithm, CompressionOptions } from './types.js';
-
-/**
- * Maps file extensions to compression algorithms
- */
-const extensionToAlgorithm: Record<string, CompressionAlgorithm> = {
-  '.gz': CompressionAlgorithm.GZIP,
-  '.gzip': CompressionAlgorithm.GZIP,
-  '.br': CompressionAlgorithm.BROTLI,
-  '.brotli': CompressionAlgorithm.BROTLI,
-  '.deflate': CompressionAlgorithm.DEFLATE,
-};
+import { extensionToAlgorithm } from './utils.js';
 
 /**
  * Detects compression algorithm based on file extension

@@ -9,10 +9,21 @@ import { signFile } from './crypto.js';
 /**
  * Maps compression algorithms to file extensions
  */
-const algorithmToExtension: Record<CompressionAlgorithm, string> = {
+export const algorithmToExtension: Record<CompressionAlgorithm, string> = {
   [CompressionAlgorithm.GZIP]: '.gz',
   [CompressionAlgorithm.BROTLI]: '.br',
   [CompressionAlgorithm.DEFLATE]: '.deflate'
+};
+
+/**
+ * Maps file extensions to compression algorithms
+ */
+export const extensionToAlgorithm: Record<string, CompressionAlgorithm> = {
+  '.gz': CompressionAlgorithm.GZIP,
+  '.gzip': CompressionAlgorithm.GZIP,
+  '.br': CompressionAlgorithm.BROTLI,
+  '.brotli': CompressionAlgorithm.BROTLI,
+  '.deflate': CompressionAlgorithm.DEFLATE,
 };
 
 const mkdir = promisify(fs.mkdir);
