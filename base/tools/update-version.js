@@ -38,15 +38,21 @@ try {
   process.exit(1);
 }
 
-// Replace the version placeholder
+// Replace all occurrences of the version placeholder
 const originalContent = versionFileContent;
-versionFileContent = versionFileContent.replace(/['"]__VERSION__['"]/, `'${version}'`);
+versionFileContent = versionFileContent.replace(/['"]__VERSION__['"]/g, `'${version}'`);
 
-// Verify the replacement occurred
+// Verify replacement occurred
 if (versionFileContent === originalContent) {
   console.error('Failed to replace version placeholder in the file.');
   console.error('Make sure the version.js file contains the __VERSION__ placeholder.');
   process.exit(1);
+}
+
+// Verify no placeholder remains
+if (versionFileContent.includes('__VERSION__')) {
+  console.warn('Warning: Not all version placeholders were replaced.');
+  console.warn('Check for variant formats of the placeholder that might have been missed.');
 }
 
 // Write the updated file
