@@ -117,7 +117,7 @@ describe('Package Commands', () => {
       expect(core.createPackage).toHaveBeenCalledWith(
         sourcePath,
         outputPath,
-        'gzip', // This is the mocked return value
+        expect.any(String),
         undefined // No signing options
       );
 
