@@ -95,6 +95,16 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
+  // Set Node.js environment for tools directory
+  {
+    files: ['tools/**/*.js'],
+    languageOptions: {
+      // Set the environment to Node.js
+      env: {
+        node: true
+      }
+    }
+  },
   {
     ignores: ['dist/**', 'node_modules/**', 'jest.config.js'],
   },
