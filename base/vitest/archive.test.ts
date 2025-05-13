@@ -138,4 +138,46 @@ describe('archive.ts', () => {
     const excludedEntry = archive.entries.find((e: { path: string }) => e.path === 'excluded.txt');
     expect(excludedEntry).toBeUndefined();
   });
+
+  it('should detect and block path traversal attempts', async () => {
+    // Create a malicious archive with a path traversal entry
+    const maliciousArchive = {
+      version: 1,
+      entries: [{
+        path: '../malicious.js', // Simple path traversal attempt
+        size: 26,
+        mimeType: 'application/javascript',
+        data: Buffer.from('console.log("Malicious!");')
+      }]
+    };
+
+    // Attempt to extract the archive
+    await expect(extractArchive(maliciousArchive, EXTRACT_DIR))
+      .rejects.toThrow('Blocked path traversal attempt: ../malicious.js');
+
+    // Check that no file was created outside the target directory
+    const maliciousFilePath = path.join(path.dirname(EXTRACT_DIR), 'malicious.js');
+    expect(fs.existsSync(maliciousFilePath)).toBe(false);
+  });
+
+  it('should block complex path traversal attempts', async () => {
+    // Create a malicious archive with a complex path traversal entry
+    const maliciousArchive = {
+      version: 1,
+      entries: [{
+        path: 'legitimate/../../malicious.js', // Complex path traversal attempt
+        size: 26,
+        mimeType: 'application/javascript',
+        data: Buffer.from('console.log("Malicious!");')
+      }]
+    };
+
+    // Attempt to extract the archive
+    await expect(extractArchive(maliciousArchive, EXTRACT_DIR))
+      .rejects.toThrow('Blocked path traversal attempt: legitimate/../../malicious.js');
+
+    // Check that no file was created outside the target directory
+    const maliciousFilePath = path.join(path.dirname(EXTRACT_DIR), 'malicious.js');
+    expect(fs.existsSync(maliciousFilePath)).toBe(false);
+  });
 });

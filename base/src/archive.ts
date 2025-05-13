@@ -260,17 +260,25 @@ export async function extractArchive(
   // Ensure output directory exists
   await mkdir(outputPath, { recursive: true });
 
+  // Get the resolved absolute output path
+  const resolvedOutputPath = path.resolve(outputPath);
+
   // Extract entries
   for (const entry of archive.entries) {
-    // Create full path
-    const fullPath = path.join(outputPath, entry.path);
+    // Resolve the full target path
+    const target = path.resolve(resolvedOutputPath, entry.path);
+
+    // Check for path traversal attempt
+    if (!target.startsWith(resolvedOutputPath + path.sep)) {
+      throw new Error(`Blocked path traversal attempt: ${entry.path}`);
+    }
 
     // Ensure directory exists
-    const dir = path.dirname(fullPath);
+    const dir = path.dirname(target);
     await mkdir(dir, { recursive: true });
 
     // Write file
-    await writeFile(fullPath, entry.data);
+    await writeFile(target, entry.data);
   }
 }
 
