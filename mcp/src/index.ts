@@ -406,5 +406,3 @@ server.tool(
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-
-// console.log(`MCP server "${server.name}" version ${server.version} is running.`); // FIXME: Linter issues with accessing server.name and server.version
