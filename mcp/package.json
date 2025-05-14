@@ -7,7 +7,7 @@
   "type": "module",
   "main": "build/index.js",
   "bin": {
-    "packager": "./build/index.js"
+    "packager-mcp": "./build/index.js"
   },
   "scripts": {
     "build": "tsc && chmod +x build/index.js",
@@ -15,7 +15,9 @@
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint 'src/**/*.ts' --fix",
     "typecheck": "tsc --noEmit --pretty --incremental false",
-    "inspect": "npx @modelcontextprotocol/inspector node build/index.js"
+    "inspect": "npx @modelcontextprotocol/inspector node build/index.js",
+    "publish:local": "npm uninstall -g @devstacks/packager-mcp && npm run build && npm link",
+    "publish:npm": "npm publish --access public"
   },
   "keywords": [
     "mcp",
