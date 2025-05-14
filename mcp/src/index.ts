@@ -8,7 +8,7 @@ import * as Packager from '@devstacks/packager';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const version = '0.1.0'; // TODO: Consider if this should match @devstacks/packager version or mcp package version
+const version = '0.1.5';
 
 const server = new McpServer({
   name: 'packager',
