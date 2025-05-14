@@ -11,7 +11,11 @@
   },
   "scripts": {
     "build": "tsc && chmod +x build/index.js",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "typecheck": "tsc --noEmit --pretty --incremental false",
+    "inspect": "npx @modelcontextprotocol/inspector node build/index.js"
   },
   "keywords": [
     "mcp",
@@ -27,7 +31,12 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.26.0",
     "@types/node": "^22.15.3",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "eslint": "^9.26.0",
     "typescript": "^5.8.3"
   }
 }

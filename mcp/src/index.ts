@@ -5,6 +5,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import * as Packager from '@devstacks/packager';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const version = '0.1.0'; // TODO: Consider if this should match @devstacks/packager version or mcp package version
 
@@ -35,8 +37,28 @@ server.tool(
     exclude: z.string().optional().describe('Exclude file pattern (glob), comma-separated'),
   },
   async (params) => {
-    console.log('archive tool called with:', params);
-    return respond('Archive tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Parse include/exclude patterns
+      const archiveOptions: Record<string, string[]> = {};
+      if (params.include) archiveOptions.include = params.include.split(',');
+      if (params.exclude) archiveOptions.exclude = params.exclude.split(',');
+
+      // Archive the directory
+      await Packager.archiveDirectory(
+        params.source,
+        params.output,
+        Object.keys(archiveOptions).length ? archiveOptions : {}
+      );
+
+      // Get file info for the output
+      const stats = await fs.promises.stat(params.output);
+      const fileSize = Packager.formatFileSize(stats.size);
+
+      return respond(`Archive created: ${params.output} (${fileSize})`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to create archive: ${errorMessage}`, true);
+    }
   }
 );
 
@@ -52,9 +74,77 @@ server.tool(
     exclude: z.string().optional().describe('Exclude file pattern for archiving (glob), comma-separated'),
   },
   async (params) => {
-    console.log('compress tool called with:', params);
-    // Actual implementation would call the packager's compress function
-    return respond('Compress tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Create a temp path for the archive if needed
+      let fileToCompress = params.source;
+      let tempPath: string | null = null;
+
+      // Check if source is a directory and --archive option is set
+      const isDirectory = fs.existsSync(params.source) && fs.statSync(params.source).isDirectory();
+      const shouldArchive = isDirectory && params.archive;
+
+      // If it's a directory and archive is specified, archive it first
+      if (shouldArchive) {
+        // Create a temporary file for the archive
+        tempPath = `${params.output}.archive.tmp`;
+
+        // Archive the directory
+        const archiveOptions: Record<string, string[]> = {};
+        if (params.include) archiveOptions.include = params.include.split(',');
+        if (params.exclude) archiveOptions.exclude = params.exclude.split(',');
+
+        await Packager.archiveDirectory(
+          params.source,
+          tempPath,
+          Object.keys(archiveOptions).length ? archiveOptions : {}
+        );
+        fileToCompress = tempPath;
+      }
+
+      try {
+        // Get compression algorithm
+        const algorithm = params.algorithm
+          ? Packager.getCompressionAlgorithm(params.algorithm)
+          : Packager.CompressionAlgorithm.GZIP;
+
+        // Compress file with validated options
+        const compressOptions: { algorithm: Packager.CompressionAlgorithm; level?: number } = { algorithm };
+        if (params.level) {
+          compressOptions.level = params.level;
+        }
+
+        await Packager.compressFile(fileToCompress, params.output, compressOptions);
+
+        // Get file info for source and output
+        const sourceStats = await fs.promises.stat(fileToCompress);
+        const sourceSize = sourceStats.size;
+        const outputStats = await fs.promises.stat(params.output);
+        const outputSize = outputStats.size;
+
+        // Calculate compression ratio
+        const ratio = sourceSize === 0
+          ? '0.00'
+          : (((sourceSize - outputSize) / sourceSize) * 100).toFixed(2);
+
+        // Format sizes
+        const outputSizeFormatted = Packager.formatFileSize(outputSize);
+
+        // Format success message based on whether we archived or not
+        const successMsg = shouldArchive
+          ? `Directory archived and compressed: ${params.output} (${outputSizeFormatted}, ${ratio}% reduction)`
+          : `File compressed: ${params.output} (${outputSizeFormatted}, ${ratio}% reduction)`;
+
+        return respond(successMsg);
+      } finally {
+        // Clean up temp file if it exists
+        if (tempPath && fs.existsSync(tempPath)) {
+          fs.unlinkSync(tempPath);
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to compress: ${errorMessage}`, true);
+    }
   }
 );
 
@@ -67,8 +157,66 @@ server.tool(
     unarchive: z.boolean().optional().describe('Unarchive the decompressed file if it is an archive'),
   },
   async (params) => {
-    console.log('decompress tool called with:', params);
-    return respond('Decompress tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Get algorithm if specified
+      const algorithm = params.algorithm
+        ? Packager.getCompressionAlgorithm(params.algorithm)
+        : undefined;
+
+      // Create a temp path for the decompressed file if we need to unarchive
+      const shouldUnarchive = params.unarchive === true;
+      let decompressedPath = params.output;
+      let tempPath: string | null = null;
+
+      // If we're going to unarchive, use a temporary file for decompression
+      if (shouldUnarchive) {
+        tempPath = `${params.output}.decompressed.tmp`;
+        decompressedPath = tempPath;
+      }
+
+      try {
+        // Decompress file with optional algorithm
+        await Packager.decompressFile(params.source, decompressedPath, algorithm);
+
+        // If unarchive option is specified, try to unarchive the decompressed file
+        if (shouldUnarchive) {
+          try {
+            // Make sure the output directory exists
+            const outputDir = path.dirname(params.output);
+            await fs.promises.mkdir(outputDir, { recursive: true });
+
+            // Unarchive the file
+            await Packager.unarchiveFile(decompressedPath, params.output);
+
+            return respond(`File decompressed and extracted to: ${params.output}`);
+          } catch (unarchiveErr) {
+            // If the decompressed file is not a valid archive, copy it to the output path
+            if (unarchiveErr instanceof Error && unarchiveErr.message.includes('Invalid archive format')) {
+              await fs.promises.copyFile(decompressedPath, params.output);
+              return respond(
+                `Warning: The decompressed file is not a valid archive. Saved as regular file to: ${params.output}`
+              );
+            } else {
+              throw unarchiveErr;
+            }
+          }
+        } else {
+          // Get output file info
+          const outputStats = await fs.promises.stat(params.output);
+          const outputSize = Packager.formatFileSize(outputStats.size);
+
+          return respond(`File decompressed: ${params.output} (${outputSize})`);
+        }
+      } finally {
+        // Clean up temp file if it exists
+        if (tempPath && fs.existsSync(tempPath)) {
+          fs.unlinkSync(tempPath);
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to process file: ${errorMessage}`, true);
+    }
   }
 );
 
@@ -80,8 +228,19 @@ server.tool(
     privkey: z.string().describe('Path to the private key file'),
   },
   async (params) => {
-    console.log('sign tool called with:', params);
-    return respond('Sign tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Sign file with the provided private key
+      const signOptions: Record<string, unknown> = {
+        privateKeyPath: params.privkey
+      };
+
+      await Packager.signFile(params.source, params.output, signOptions);
+
+      return respond(`Signature created: ${params.output}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to create signature: ${errorMessage}`, true);
+    }
   }
 );
 
@@ -93,8 +252,23 @@ server.tool(
     pubkey: z.string().describe('Path to the public key file'),
   },
   async (params) => {
-    console.log('verify tool called with:', params);
-    return respond('Verify tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Verify signature with the provided public key
+      const verifyOptions: Record<string, unknown> = {
+        publicKeyPath: params.pubkey
+      };
+
+      const isValid = await Packager.verifyFile(params.file, params.signature, verifyOptions);
+
+      if (isValid) {
+        return respond('Signature is valid');
+      } else {
+        return respond('Signature is invalid', true);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to verify signature: ${errorMessage}`, true);
+    }
   }
 );
 
@@ -105,8 +279,25 @@ server.tool(
     publicKeyPath: z.string().describe('Path where the public key file will be saved'),
   },
   async (params) => {
-    console.log('generate-keys tool called with:', params);
-    return respond('Generate keys tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Generate and save key pair
+      await Packager.generateAndSaveKeyPair({
+        privateKeyPath: params.privateKeyPath,
+        publicKeyPath: params.publicKeyPath,
+      });
+
+      const message = [
+        'Key pair generated:',
+        `  Private key: ${params.privateKeyPath}`,
+        `  Public key: ${params.publicKeyPath}`,
+        '',
+        'Keep your private key secure and do not share it with anyone!'
+      ].join('\n');
+      return respond(message);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to generate key pair: ${errorMessage}`, true);
+    }
   }
 );
 
@@ -117,8 +308,18 @@ server.tool(
     publicKeyPath: z.string().describe('Output public key file path'),
   },
   async (params) => {
-    console.log('derive-public-key tool called with:', params);
-    return respond('Derive public key tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Derive and save public key from private key
+      await Packager.deriveAndSavePublicKey(
+        params.privateKeyPath,
+        params.publicKeyPath
+      );
+
+      return respond(`Public key derived: ${params.publicKeyPath}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to derive public key: ${errorMessage}`, true);
+    }
   }
 );
 
@@ -131,8 +332,56 @@ server.tool(
     privkey: z.string().optional().describe('Path to the private key file for signing'),
   },
   async (params) => {
-    console.log('package tool called with:', params);
-    return respond('Package tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Get compression algorithm
+      const algorithm = params.algorithm
+        ? Packager.getCompressionAlgorithm(params.algorithm)
+        : Packager.CompressionAlgorithm.GZIP;
+
+      // Create signing options if private key is provided
+      const signOptions = params.privkey ? {
+        privateKeyPath: params.privkey,
+      } : null;
+
+      // Create package
+      const result = await Packager.createPackage(
+        params.source,
+        params.output,
+        algorithm,
+        signOptions
+      );
+
+      // Get file info
+      const archiveStats = await fs.promises.stat(result.archivePath);
+      const packageStats = await fs.promises.stat(result.compressedPath);
+      const archiveSize = Packager.formatFileSize(archiveStats.size);
+      const packageSize = Packager.formatFileSize(packageStats.size);
+
+      // Calculate compression ratio
+      const ratio = archiveStats.size === 0
+        ? '0.00'
+        : (((archiveStats.size - packageStats.size) / archiveStats.size) * 100).toFixed(2);
+
+      // Build response message
+      let responseMsg = 'Package created successfully\n\n';
+      responseMsg += `Archive: ${result.archivePath} (${archiveSize})\n`;
+      responseMsg += `Package: ${result.compressedPath} (${packageSize})\n`;
+
+      if (result.signaturePath) {
+        responseMsg += `Signature: ${result.signaturePath}\n`;
+      }
+
+      responseMsg += `Compression ratio: ${ratio}%\n`;
+
+      // Clean up the temporary archive file
+      fs.unlinkSync(result.archivePath);
+      responseMsg += `Temporary archive file removed: ${result.archivePath}`;
+
+      return respond(responseMsg);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to create package: ${errorMessage}`, true);
+    }
   }
 );
 
@@ -143,8 +392,15 @@ server.tool(
     outputDirectory: z.string().describe('Output directory path'),
   },
   async (params) => {
-    console.log('unarchive tool called with:', params);
-    return respond('Unarchive tool: Not implemented yet. Params: ' + JSON.stringify(params));
+    try {
+      // Extract archive
+      await Packager.unarchiveFile(params.archiveFile, params.outputDirectory);
+
+      return respond(`Archive extracted to: ${params.outputDirectory}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return respond(`Failed to extract archive: ${errorMessage}`, true);
+    }
   }
 );
 
