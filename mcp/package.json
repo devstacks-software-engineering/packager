@@ -1,0 +1,33 @@
+{
+  "name": "@devstacks/packager-mcp",
+  "version": "0.1.5",
+  "description": "MCP for package deployment files compression, archiving, and signing.",
+  "author": "Moacir Braga <me@moacirbrg.com>",
+  "license": "MIT",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "packager": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x build/index.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "packager",
+    "compress",
+    "archive",
+    "sign",
+    "signature"
+  ],
+  "dependencies": {
+    "@devstacks/packager": "^0.20.0",
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "typescript": "^5.8.3"
+  }
+}
