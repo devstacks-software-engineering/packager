@@ -1,6 +1,6 @@
 {
   "name": "@devstacks/packager-mcp",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "MCP for package deployment files compression, archiving, and signing.",
   "author": "Moacir Braga <me@moacirbrg.com>",
   "license": "MIT",

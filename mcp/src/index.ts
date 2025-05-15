@@ -373,8 +373,10 @@ server.tool(
       responseMsg += `Compression ratio: ${ratio}%\n`;
 
       // Clean up the temporary archive file
-      fs.unlinkSync(result.archivePath);
-      responseMsg += `Temporary archive file removed: ${result.archivePath}`;
+      if (fs.existsSync(result.archivePath)) {
+        fs.unlinkSync(result.archivePath);
+        responseMsg += `Temporary archive file removed: ${result.archivePath}`;
+      }
 
       return respond(responseMsg);
     } catch (err) {
