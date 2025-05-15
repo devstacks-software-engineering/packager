@@ -20,7 +20,7 @@ import {
   handleUnarchive
 } from './commands.js';
 
-import { version } from './version.js';
+import version from './version.js';
 
 // Configure main CLI program
 program
