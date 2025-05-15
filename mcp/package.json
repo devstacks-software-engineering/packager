@@ -1,6 +1,6 @@
 {
   "name": "@devstacks/packager-mcp",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "MCP for package deployment files compression, archiving, and signing.",
   "author": "Moacir Braga <me@moacirbrg.com>",
   "license": "MIT",
@@ -10,8 +10,8 @@
     "packager-mcp": "./build/index.js"
   },
   "scripts": {
+    "prebuild": "npx @devstacks/versioner@latest create-ts ./src/version.ts --single-quotes --semi",
     "build": "tsc && chmod +x build/index.js",
-    "prepare": "npm run build",
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint 'src/**/*.ts' --fix",
     "typecheck": "tsc --noEmit --pretty --incremental false",

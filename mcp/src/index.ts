@@ -7,8 +7,7 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import * as Packager from '@devstacks/packager';
 import fs from 'node:fs';
 import path from 'node:path';
-
-const version = '0.1.5';
+import version from './version.js';
 
 const server = new McpServer({
   name: 'packager',
