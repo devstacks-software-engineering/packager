@@ -5,6 +5,7 @@ node_modules/
 dist/
 build/
 lib/
+src/cli/version.ts
 
 # Test and coverage outputs
 coverage/
