@@ -1,6 +1,6 @@
 {
   "name": "@devstacks/packager",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "description": "A versatile utility for archiving, compressing, and signing deployment files.",
   "keywords": [
     "package",
@@ -12,7 +12,7 @@
     "sign",
     "signature"
   ],
-  "homepage": "https://github.com/devstacks-software-engineering/packager#readme",
+  "homepage": "https://github.com/devstacks-software-engineering/packager/tree/main/base",
   "bugs": {
     "url": "https://github.com/devstacks-software-engineering/packager/issues"
   },

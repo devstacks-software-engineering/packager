@@ -1,6 +1,6 @@
 {
   "name": "@devstacks/packager-mcp",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "MCP for package deployment files compression, archiving, and signing.",
   "author": "Moacir Braga <me@moacirbrg.com>",
   "license": "MIT",
@@ -27,6 +27,14 @@
     "sign",
     "signature"
   ],
+  "homepage": "https://github.com/devstacks-software-engineering/packager/tree/main/mcp",
+  "bugs": {
+    "url": "https://github.com/devstacks-software-engineering/packager/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devstacks-software-engineering/packager.git"
+  },
   "dependencies": {
     "@devstacks/packager": "^0.20.0",
     "@modelcontextprotocol/sdk": "^1.11.0",
