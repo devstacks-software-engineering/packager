@@ -36,7 +36,7 @@
     "url": "git+https://github.com/devstacks-software-engineering/packager.git"
   },
   "dependencies": {
-    "@devstacks/packager": "^0.20.0",
+    "@devstacks/packager": "^0.20.1",
     "@modelcontextprotocol/sdk": "^1.11.0",
     "zod": "^3.24.4"
   },
