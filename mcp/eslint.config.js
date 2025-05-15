@@ -96,6 +96,6 @@ export default [
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: ['build/**', 'node_modules/**'],
   },
 ];
