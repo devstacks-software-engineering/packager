@@ -1,6 +1,6 @@
 {
   "name": "@devstacks/packager",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "description": "A versatile utility for archiving, compressing, and signing deployment files.",
   "keywords": [
     "package",
