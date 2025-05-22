@@ -61,8 +61,7 @@ describe('File Compression', () => {
 
   it.each([
     CompressionAlgorithm.GZIP,
-    CompressionAlgorithm.BROTLI,
-    CompressionAlgorithm.DEFLATE,
+    CompressionAlgorithm.BROTLI
   ])('should work with %s algorithm', async (algorithm) => {
     // Create test file
     const testContent = 'Test content for compression';
@@ -75,7 +74,7 @@ describe('File Compression', () => {
     // Compress file
     await compressFile(inputPath, compressedPath, { algorithm });
 
-    // Decompress file with explicit algorithm (as auto-detection for DEFLATE is disabled)
+    // Decompress file with explicit algorithm
     await decompressFile(compressedPath, outputPath, algorithm);
 
     // Verify content is the same
@@ -173,18 +172,18 @@ describe('File Compression', () => {
     // Create test file
     const testContent = 'Test content for explicit algorithm decompression';
     const inputPath = path.join(tempDir, 'explicit-algo-input.txt');
-    const compressedPath = path.join(tempDir, 'explicit-algo.deflate');
+    const compressedPath = path.join(tempDir, 'explicit-algo.br');
     const outputPath = path.join(tempDir, 'explicit-algo-output.txt');
 
     await writeFile(inputPath, testContent);
 
-    // Compress file with DEFLATE
+    // Compress file with BROTLI
     await compressFile(inputPath, compressedPath, {
-      algorithm: CompressionAlgorithm.DEFLATE
+      algorithm: CompressionAlgorithm.BROTLI
     });
 
     // Decompress file with explicit algorithm
-    await decompressFile(compressedPath, outputPath, CompressionAlgorithm.DEFLATE);
+    await decompressFile(compressedPath, outputPath, CompressionAlgorithm.BROTLI);
 
     // Verify content is the same
     const outputContent = await readFile(outputPath, 'utf8');
@@ -197,31 +196,25 @@ describe('File Compression', () => {
     const inputPath = path.join(tempDir, 'ext-detect-input.txt');
     const gzipPath = path.join(tempDir, 'ext-detect.gz');
     const brotliPath = path.join(tempDir, 'ext-detect.br');
-    const deflatePath = path.join(tempDir, 'ext-detect.deflate');
 
     await writeFile(inputPath, testContent);
 
     // Compress with different algorithms
     await compressFile(inputPath, gzipPath, { algorithm: CompressionAlgorithm.GZIP });
     await compressFile(inputPath, brotliPath, { algorithm: CompressionAlgorithm.BROTLI });
-    await compressFile(inputPath, deflatePath, { algorithm: CompressionAlgorithm.DEFLATE });
 
     // Decompress with auto-detection by extension
     const gzipOutput = path.join(tempDir, 'ext-detect-gzip-output.txt');
     const brotliOutput = path.join(tempDir, 'ext-detect-brotli-output.txt');
-    const deflateOutput = path.join(tempDir, 'ext-detect-deflate-output.txt');
 
     await decompressFile(gzipPath, gzipOutput);
     await decompressFile(brotliPath, brotliOutput);
-    await decompressFile(deflatePath, deflateOutput);
 
     // Verify content is the same for all
     const gzipContent = await readFile(gzipOutput, 'utf8');
     const brotliContent = await readFile(brotliOutput, 'utf8');
-    const deflateContent = await readFile(deflateOutput, 'utf8');
 
     expect(gzipContent).toBe(testContent);
     expect(brotliContent).toBe(testContent);
-    expect(deflateContent).toBe(testContent);
   });
 });

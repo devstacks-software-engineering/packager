@@ -30,8 +30,6 @@ export enum CompressionAlgorithm {
   GZIP = 'gzip',
   /** Good for C#/.NET (Windows apps) in terms of compression ratio */
   BROTLI = 'brotli',
-  /** Raw DEFLATE compression, widely compatible with most platforms, slightly less overhead than GZIP */
-  DEFLATE = 'deflate',
 }
 
 /**

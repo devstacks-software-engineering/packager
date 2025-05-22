@@ -9,7 +9,7 @@ A robust utility for archiving, compressing, and signing web applications for cr
 ## Features
 
 - **📦 Archiving**: Preserve directory structures with metadata
-- **🗜️ Compression**: Multiple algorithms (GZIP, Brotli, DEFLATE)
+- **🗜️ Compression**: Multiple algorithms (GZIP, Brotli)
 - **🔑 Cryptography**: Ed25519 signing and verification
 - **🖥️ CLI**: Intuitive command-line interface
 - **⚡ API**: Fully typed, promise-based API
@@ -252,7 +252,7 @@ await compressFile('./input.txt', './output.txt.gz', {
 ```
 
 **Options:**
-- `algorithm`: Compression algorithm (`GZIP`, `BROTLI`, or `DEFLATE`)
+- `algorithm`: Compression algorithm (`GZIP` or `BROTLI`)
 - `level`: Compression level (1-9, higher is better compression but slower)
 
 #### `decompressFile(sourcePath: string, outputPath: string, options?: { algorithm?: CompressionAlgorithm }): Promise<void>`
@@ -353,7 +353,6 @@ try {
 |-----------|----------|-------------|-------|----------------|
 | GZIP      | General use | Good | Fast | Widely supported |
 | Brotli    | Web content | Excellent | Medium | Modern browsers |
-| DEFLATE   | Legacy systems | Good | Fast | Universal |
 
 ### Memory Usage
 
@@ -447,31 +446,10 @@ The archive format is designed to be simple, efficient, and extensible:
 
 The packager supports multiple compression algorithms. The choice of algorithm can impact both the size of the compressed data and the performance of compression and decompression. Native platform support for decompression is a key factor in selecting an algorithm for optimal performance.
 
-### **DEFLATE**
-
-* **Description:**
-    * A lossless data compression algorithm that uses a combination of LZ77 and Huffman coding. It is the core algorithm for GZIP and ZIP.
-* **Best For Compression:**
-    * Good balance between compression ratio and speed; scenarios requiring low overhead.
-* **Native Decompression Support & Best Fit for Decompression:**
-    * **Windows (C#/.NET):**
-        * Native support via `System.IO.Compression.DeflateStream`.
-        * Fits well when decompressing data from GZIP or ZIP archives, or when a lightweight, fast decompression is needed.
-    * **Linux (Python with GTK):**
-        * Native support via the `zlib` standard library.
-        * Excellent fit for general-purpose decompression where `zlib` is readily available.
-    * **Android (Java/Kotlin):**
-        * Native support via `java.util.zip.InflaterInputStream` or `java.util.zip.Inflater`.
-        * A good choice for decompressing ZIP files or raw DEFLATE streams.
-    * **iOS/macOS (Swift):**
-        * Native support via Apple's Compression framework (using `Algorithm.zlib` or the C-level `COMPRESSION_ZLIB`).
-        * Ideal for decompressing raw DEFLATE streams or as the core for handling GZIP/ZIP data.
-
-
 ### **GZIP**
 
 * **Description:**
-    * Based on DEFLATE, it adds a header and trailer with metadata, including a CRC32 checksum for error detection. Good compression ratio and widely compatible.
+    * A widely-used compression format that adds headers and trailers with metadata, including a CRC32 checksum for error detection. Good compression ratio and widely compatible.
 * **Best For Compression:**
     * General-purpose usage, especially for web content and file transfer where compatibility and integrity checks are valued.
 * **Native Decompression Support & Best Fit for Decompression:**
@@ -485,7 +463,7 @@ The packager supports multiple compression algorithms. The choice of algorithm c
         * Native support via `java.util.zip.GZIPInputStream`.
         * Commonly used for decompressing web responses and `.gz` files.
     * **iOS/macOS (Swift):**
-        * Native support by using Apple's Compression framework with `Algorithm.zlib` (DEFLATE) and manually handling GZIP headers/trailers, or by leveraging common system libraries that wrap zlib for GZIP.
+        * Native support by using Apple's Compression framework with `Algorithm.zlib` and manually handling GZIP headers/trailers, or by leveraging common system libraries that wrap zlib for GZIP.
         * Fits well for decompressing `.gz` files and GZIP-encoded web data.
 
 
@@ -503,7 +481,7 @@ The packager supports multiple compression algorithms. The choice of algorithm c
         * Native decompression typically requires external libraries (e.g., `brotli` PyPI package).
         * Fits best when the environment is set up with these dependencies and maximum decompression ratio benefits are sought.
     * **Android (Java/Kotlin):**
-        * Native support is less direct for general app development compared to DEFLATE/GZIP; often available via WebView for web content or through JNI with Brotli libraries.
+        * Native support is less direct for general app development compared to GZIP; often available via WebView for web content or through JNI with Brotli libraries.
         * Best fit for decompressing Brotli-encoded content within web contexts or when specifically integrating a Brotli library.
     * **iOS/macOS (Swift):**
         * Native support via Apple's Compression framework (using `Algorithm.brotli` or C-level `COMPRESSION_BROTLI`, available iOS 13+/macOS 10.15+; C API availability might be iOS 15+ for some uses, requiring OS version checks).

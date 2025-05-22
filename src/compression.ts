@@ -24,8 +24,6 @@ const gzip = promisify(zlib.gzip);
 const gunzip = promisify(zlib.gunzip);
 const brotliCompress = promisify(zlib.brotliCompress);
 const brotliDecompress = promisify(zlib.brotliDecompress);
-const deflate = promisify(zlib.deflate);
-const inflate = promisify(zlib.inflate);
 
 /**
  * Compresses data using the specified algorithm
@@ -42,7 +40,7 @@ export async function compressData(
 
   // Validate compression level based on algorithm
   if (level < 0 || level > (options.algorithm === CompressionAlgorithm.BROTLI ? 11 : 9)) {
-    throw new RangeError(`Invalid compression level ${level}. Expected 0-9 (gzip/deflate) or 0-11 (brotli).`);
+    throw new RangeError(`Invalid compression level ${level}. Expected 0-9 (gzip) or 0-11 (brotli).`);
   }
 
   // Compress based on algorithm
@@ -55,8 +53,6 @@ export async function compressData(
         [zlib.constants.BROTLI_PARAM_QUALITY]: level,
       },
     });
-  case CompressionAlgorithm.DEFLATE:
-    return await deflate(data, { level });
   default:
     throw new Error(`Unsupported compression algorithm: ${options.algorithm}`);
   }
@@ -79,8 +75,6 @@ export async function decompressData(
       return gunzip(data);
     case CompressionAlgorithm.BROTLI:
       return brotliDecompress(data);
-    case CompressionAlgorithm.DEFLATE:
-      return inflate(data);
     default:
       throw new Error(`Unsupported compression algorithm: ${algorithm}`);
     }
@@ -100,8 +94,7 @@ export async function decompressData(
       // Brotli decompression failed
     }
 
-    // Don't try DEFLATE as fallback since it's error-prone when used blindly
-    // DEFLATE doesn't have a consistent signature and can lead to false positives
+    // Unable to detect compression format
     throw new Error('Unable to detect compression algorithm. Please specify the algorithm explicitly.');
   } catch (error) {
     if (error instanceof Error) {

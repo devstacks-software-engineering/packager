@@ -105,8 +105,7 @@ describe('createPackage', () => {
     // Test with all supported algorithms
     for (const algorithm of [
       CompressionAlgorithm.GZIP,
-      CompressionAlgorithm.BROTLI,
-      CompressionAlgorithm.DEFLATE
+      CompressionAlgorithm.BROTLI
     ]) {
       const outputPath = path.join(outputDir, `test-${algorithm}-package`);
 

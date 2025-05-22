@@ -12,7 +12,6 @@ import { signFile } from './crypto.js';
 export const algorithmToExtension: Record<CompressionAlgorithm, string> = {
   [CompressionAlgorithm.GZIP]: '.gz',
   [CompressionAlgorithm.BROTLI]: '.br',
-  [CompressionAlgorithm.DEFLATE]: '.deflate'
 };
 
 /**
@@ -23,7 +22,6 @@ export const extensionToAlgorithm: Record<string, CompressionAlgorithm> = {
   '.gzip': CompressionAlgorithm.GZIP,
   '.br': CompressionAlgorithm.BROTLI,
   '.brotli': CompressionAlgorithm.BROTLI,
-  '.deflate': CompressionAlgorithm.DEFLATE,
 };
 
 const mkdir = promisify(fs.mkdir);
@@ -103,8 +101,6 @@ export function getCompressionAlgorithm(algorithm: string): CompressionAlgorithm
     return CompressionAlgorithm.GZIP;
   case 'brotli':
     return CompressionAlgorithm.BROTLI;
-  case 'deflate':
-    return CompressionAlgorithm.DEFLATE;
   default:
     throw new Error(`Unsupported compression algorithm: ${algorithm}`);
   }
