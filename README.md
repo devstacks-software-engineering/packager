@@ -429,10 +429,6 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 ## License
 
 MIT © [DevStacks](https://devstacks.com)
-  CompressionAlgorithm.GZIP,
-  { privateKeyPath: '/path/to/private.key' }
-);
-```
 
 ## Archive Format
 
