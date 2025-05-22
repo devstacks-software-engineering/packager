@@ -17,13 +17,6 @@ describe('getCompressionAlgorithm', () => {
     expect(getCompressionAlgorithm('BrOtLi')).toBe(CompressionAlgorithm.BROTLI);
   });
 
-  it('returns correct compression algorithm for DEFLATE', () => {
-    expect(getCompressionAlgorithm('deflate')).toBe(CompressionAlgorithm.DEFLATE);
-    expect(getCompressionAlgorithm('DEFLATE')).toBe(CompressionAlgorithm.DEFLATE);
-    expect(getCompressionAlgorithm('Deflate')).toBe(CompressionAlgorithm.DEFLATE);
-    expect(getCompressionAlgorithm('DeFlAtE')).toBe(CompressionAlgorithm.DEFLATE);
-  });
-
   it('throws error for invalid compression algorithm', () => {
     expect(() => getCompressionAlgorithm('invalid')).toThrow(
       'Unsupported compression algorithm: invalid'

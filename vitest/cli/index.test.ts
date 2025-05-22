@@ -123,7 +123,7 @@ describe('CLI Index Module', () => {
 
     expect(mockCommand.option).toHaveBeenCalledWith('-i, --include <pattern>', expect.any(String));
     expect(mockCommand.option).toHaveBeenCalledWith('-e, --exclude <pattern>', expect.any(String));
-    expect(mockCommand.option).toHaveBeenCalledWith('-a, --algorithm <algorithm>', expect.stringContaining('gzip, brotli, deflate'));
+    expect(mockCommand.option).toHaveBeenCalledWith('-a, --algorithm <algorithm>', expect.stringContaining('gzip, brotli'));
     expect(mockCommand.option).toHaveBeenCalledWith('-l, --level <level>', expect.any(String));
 
     expect(mockCommand.requiredOption).toHaveBeenCalledWith('--privkey <path>', expect.any(String));
@@ -195,7 +195,7 @@ describe('CLI Index Module', () => {
     expect(mockProgram.command).toHaveBeenCalledWith('compress');
     expect(mockCommand.alias).toHaveBeenCalledWith('c');
     expect(mockCommand.description).toHaveBeenCalledWith('Compress a file or directory');
-    expect(mockCommand.option).toHaveBeenCalledWith('-a, --algorithm <algorithm>', expect.stringContaining('gzip, brotli, deflate'));
+    expect(mockCommand.option).toHaveBeenCalledWith('-a, --algorithm <algorithm>', expect.stringContaining('gzip, brotli'));
     expect(mockCommand.option).toHaveBeenCalledWith('-l, --level <level>', expect.any(String));
   });
 
@@ -206,7 +206,7 @@ describe('CLI Index Module', () => {
     expect(mockProgram.command).toHaveBeenCalledWith('package');
     expect(mockCommand.alias).toHaveBeenCalledWith('pkg');
     expect(mockCommand.description).toHaveBeenCalledWith('Archive, compress, and optionally sign a directory into a single file');
-    expect(mockCommand.option).toHaveBeenCalledWith('-a, --algorithm <algorithm>', expect.stringContaining('gzip, brotli, deflate'));
+    expect(mockCommand.option).toHaveBeenCalledWith('-a, --algorithm <algorithm>', expect.stringContaining('gzip, brotli'));
     expect(mockCommand.option).toHaveBeenCalledWith('--privkey <path>', expect.any(String));
   });
 });

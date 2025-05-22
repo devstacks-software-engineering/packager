@@ -52,7 +52,7 @@ program
   .description('Compress a file or directory')
   .argument('<source>', 'Source file or directory to compress')
   .argument('<output>', 'Output compressed file path')
-  .option('-a, --algorithm <algorithm>', 'Compression algorithm (gzip, brotli, deflate)')
+  .option('-a, --algorithm <algorithm>', 'Compression algorithm (gzip, brotli)')
   .option('-l, --level <level>', 'Compression level (1-9)')
   .option('--archive', 'Archive the directory before compression if source is a directory')
   .option('-i, --include <pattern>', 'Include file pattern for archiving (glob), comma-separated')
@@ -69,7 +69,7 @@ program
   .description('Decompress a file')
   .argument('<source>', 'Source compressed file')
   .argument('<output>', 'Output decompressed file path or directory')
-  .option('-a, --algorithm <algorithm>', 'Compression algorithm (gzip, brotli, deflate)')
+  .option('-a, --algorithm <algorithm>', 'Compression algorithm (gzip, brotli)')
   .option('--unarchive', 'Unarchive the decompressed file if it is an archive')
   .action(handleDecompress);
 
@@ -134,7 +134,7 @@ program
   .description('Archive, compress, and optionally sign a directory into a single file')
   .argument('<source>', 'Source directory to package')
   .argument('<output>', 'Output file path for the compressed file')
-  .option('-a, --algorithm <algorithm>', 'Compression algorithm (gzip, brotli, deflate)')
+  .option('-a, --algorithm <algorithm>', 'Compression algorithm (gzip, brotli)')
   .option('--privkey <path>', 'Path to the private key file for signing')
   .action(handlePackage);
 

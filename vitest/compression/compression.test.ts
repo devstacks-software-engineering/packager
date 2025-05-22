@@ -13,10 +13,7 @@ describe('Compression Module', () => {
       [CompressionAlgorithm.GZIP, 9],
       [CompressionAlgorithm.BROTLI, undefined],
       [CompressionAlgorithm.BROTLI, 1],
-      [CompressionAlgorithm.BROTLI, 9],
-      [CompressionAlgorithm.DEFLATE, undefined],
-      [CompressionAlgorithm.DEFLATE, 1],
-      [CompressionAlgorithm.DEFLATE, 9],
+      [CompressionAlgorithm.BROTLI, 9]
     ])('should compress and decompress correctly with %s algorithm and level %s', async (algorithm, level) => {
       // Compress data
       const compressed = await compressData(testData, { algorithm, level });
@@ -66,19 +63,19 @@ describe('Compression Module', () => {
     it('should throw error for invalid compression level with GZIP', async () => {
       await expect(
         compressData(testData, { algorithm: CompressionAlgorithm.GZIP, level: 12 })
-      ).rejects.toThrow('Invalid compression level 12. Expected 0-9 (gzip/deflate) or 0-11 (brotli)');
+      ).rejects.toThrow('Invalid compression level 12. Expected 0-9 (gzip) or 0-11 (brotli)');
     });
 
     it('should throw error for invalid compression level with BROTLI', async () => {
       await expect(
         compressData(testData, { algorithm: CompressionAlgorithm.BROTLI, level: 15 })
-      ).rejects.toThrow('Invalid compression level 15. Expected 0-9 (gzip/deflate) or 0-11 (brotli)');
+      ).rejects.toThrow('Invalid compression level 15. Expected 0-9 (gzip) or 0-11 (brotli)');
     });
 
     it('should throw error for negative compression level', async () => {
       await expect(
         compressData(testData, { algorithm: CompressionAlgorithm.GZIP, level: -1 })
-      ).rejects.toThrow('Invalid compression level -1. Expected 0-9 (gzip/deflate) or 0-11 (brotli)');
+      ).rejects.toThrow('Invalid compression level -1. Expected 0-9 (gzip) or 0-11 (brotli)');
     });
 
     it('should support auto-detection of GZIP compression format', async () => {

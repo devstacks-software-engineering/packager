@@ -51,8 +51,7 @@ export function setupMocks(): void {
     getCompressionAlgorithm: vi.fn(() => 'gzip'),
     CompressionAlgorithm: {
       GZIP: 'gzip',
-      BROTLI: 'brotli',
-      DEFLATE: 'deflate'
+      BROTLI: 'brotli'
     }
   }));
 
